@@ -686,6 +686,27 @@ class JarvisApp:
                             command=lambda v=vid, n=name: [voice_var.set(v), _tts_manager.config["elevenlabs"].update({"voice_name": n}) if _tts_manager else None])
             btn.pack(side="left", padx=2)
 
+        # ElevenLabs Model Selection
+        tk.Label(win, text="ElevenLabs Model:",
+                 font=FONT_B, bg=BG, fg=TEXT).pack(anchor="w", padx=20, pady=(8,2))
+        
+        model_var = tk.StringVar(value=(
+            _tts_manager.config["elevenlabs"].get("model", "eleven_multilingual_v2") if _tts_manager else "eleven_multilingual_v2"
+        ))
+        mfrm = tk.Frame(win, bg=BG)
+        mfrm.pack(fill="x", padx=20, pady=2)
+        models = [
+            ("Multilingual v2 (Best Quality)", "eleven_multilingual_v2"),
+            ("Turbo v2.5 (Fast / Low Cost)", "eleven_turbo_v2_5"),
+            ("Flash v2.5 (Super Fast)", "eleven_flash_v2_5")
+        ]
+        for label, mkey in models:
+            tk.Radiobutton(
+                mfrm, text=label, variable=model_var, value=mkey,
+                font=FONT_S, bg=BG, fg=TEXT, selectcolor=BG3,
+                activebackground=BG, activeforeground=ACCENT
+            ).pack(anchor="w", pady=1)
+
         # Status label
         status_lbl = tk.Label(win, text="", font=FONT_S, bg=BG, fg=GREEN)
         status_lbl.pack(pady=4)
@@ -697,16 +718,19 @@ class JarvisApp:
             chosen = engine_var.get()
             api_key = key_var.get().strip()
             voice_id = voice_var.get().strip()
+            model_id = model_var.get().strip()
             if api_key:
                 _tts_manager.set_elevenlabs_key(api_key)
             if voice_id:
                 _tts_manager.config["elevenlabs"]["voice_id"] = voice_id
+            if model_id:
+                _tts_manager.config["elevenlabs"]["model"] = model_id
             _tts_manager.set_engine(chosen)
             _tts_manager.save_config()
             self._update_footer()
             status_lbl.config(
                 text=f"Applied! Active: {_tts_manager.engine_label}", fg=GREEN)
-            self._jarvis_msg(f"Settings update ho gaye Sir! Active voice ID: {voice_id}")
+            self._jarvis_msg(f"Settings update ho gaye Sir! Active Model: {model_id}, Voice ID: {voice_id}")
             speak("Settings update ho gaye Sir!")
 
         def _test():
