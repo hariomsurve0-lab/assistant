@@ -1,0 +1,24 @@
+{
+  "engine": "elevenlabs",
+  "elevenlabs": {
+    "api_key": "sk_634134cac0b22a95711aac4df475488f84dfef879272198c",
+    "voice_id": "pNInz6obpgDQGcFmaJgB",
+    "voice_name": "Adam (Warm Male)",
+    "model": "eleven_multilingual_v2",
+    "stability": 0.5,
+    "similarity_boost": 0.75,
+    "style": 0.3,
+    "use_speaker_boost": true
+  },
+  "piper": {
+    "model": "hi_IN-rohan-medium",
+    "speaker_id": 0,
+    "length_scale": 0.9
+  },
+  "edge_tts": {
+    "voice": "hi-IN-MadhurNeural",
+    "rate": "+18%",
+    "pitch": "+2Hz"
+  },
+  "language": "hi"
+}
