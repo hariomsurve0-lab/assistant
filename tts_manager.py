@@ -480,6 +480,16 @@ class TTSManager:
         self.active_name = self._resolve_engine()
         self.save_config()
 
+    def update_elevenlabs_settings(self, api_key: str, voice_id: str, model_id: str):
+        """Update all ElevenLabs settings at once and reinitialise the engine."""
+        self.config["elevenlabs"]["api_key"] = api_key
+        self.config["elevenlabs"]["voice_id"] = voice_id
+        self.config["elevenlabs"]["model"] = model_id
+        os.environ["ELEVENLABS_API_KEY"] = api_key
+        self.eleven = ElevenLabsEngine(self.config["elevenlabs"])
+        self.active_name = self._resolve_engine()
+        self.save_config()
+
     # â”€â”€ Core speak â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     def speak(self, text: str):
         """Speak text asynchronously (non-blocking)."""

@@ -764,14 +764,17 @@ class JarvisApp:
             api_key = key_var.get().strip()
             voice_id = voice_var.get().strip()
             model_id = model_var.get().strip()
-            if api_key:
-                _tts_manager.set_elevenlabs_key(api_key)
-            if voice_id:
+            
+            if chosen == "elevenlabs":
+                _tts_manager.update_elevenlabs_settings(api_key, voice_id, model_id)
+            else:
+                # If using another engine, still save the updated fields to config
+                _tts_manager.config["elevenlabs"]["api_key"] = api_key
                 _tts_manager.config["elevenlabs"]["voice_id"] = voice_id
-            if model_id:
                 _tts_manager.config["elevenlabs"]["model"] = model_id
-            _tts_manager.set_engine(chosen)
-            _tts_manager.save_config()
+                _tts_manager.set_engine(chosen)
+                _tts_manager.save_config()
+
             self._update_footer()
             status_lbl.config(
                 text=f"Applied! Active: {_tts_manager.engine_label}", fg=GREEN)
