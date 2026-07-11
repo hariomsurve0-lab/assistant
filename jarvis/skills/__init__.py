@@ -1,0 +1,3 @@
+"""
+Jarvis Default Skills Namespace
+"""
