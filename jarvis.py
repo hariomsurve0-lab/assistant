@@ -657,13 +657,38 @@ class JarvisApp:
         key_entry = tk.Entry(win, textvariable=key_var, font=FONT, bg=BG3, fg=TEXT,
                              relief="flat", show="*", highlightthickness=1,
                              highlightcolor=ACCENT, highlightbackground=BG3)
-        key_entry.pack(fill="x", padx=20, ipady=6)
-        tk.Label(win, text="Get free key at: elevenlabs.io",
-                 font=FONT_S, bg=BG, fg=TEXT_DIM).pack(anchor="w", padx=20)
+        key_entry.pack(fill="x", padx=20, ipady=4)
+
+        # ElevenLabs Voice ID
+        tk.Label(win, text="ElevenLabs Voice ID / Preset:",
+                 font=FONT_B, bg=BG, fg=TEXT).pack(anchor="w", padx=20, pady=(8,2))
+        
+        voice_var = tk.StringVar(value=(
+            _tts_manager.config["elevenlabs"].get("voice_id","pNInz6obpgDQGcFmaJgB") if _tts_manager else "pNInz6obpgDQGcFmaJgB"
+        ))
+        voice_entry = tk.Entry(win, textvariable=voice_var, font=FONT, bg=BG3, fg=TEXT,
+                               relief="flat", highlightthickness=1,
+                               highlightcolor=ACCENT, highlightbackground=BG3)
+        voice_entry.pack(fill="x", padx=20, ipady=4)
+
+        # Presets frame
+        pfrm = tk.Frame(win, bg=BG)
+        pfrm.pack(fill="x", padx=20, pady=4)
+        presets = [
+            ("Adam (Warm Male)", "pNInz6obpgDQGcFmaJgB"),
+            ("Rachel (Warm Female)", "21m00Tcm4TlvDq8ikWAM"),
+            ("Antoni (Deep Male)", "ErXwobaYiN019PkySvjV"),
+            ("Clyde (Deep Video Game)", "2EiwWnXF2V4j28gcXi8t")
+        ]
+        for name, vid in presets:
+            btn = tk.Button(pfrm, text=name.split()[0], font=FONT_S, bg=BG3, fg=ACCENT,
+                            relief="flat", bd=0, cursor="hand2", padx=6, pady=2,
+                            command=lambda v=vid, n=name: [voice_var.set(v), _tts_manager.config["elevenlabs"].update({"voice_name": n}) if _tts_manager else None])
+            btn.pack(side="left", padx=2)
 
         # Status label
         status_lbl = tk.Label(win, text="", font=FONT_S, bg=BG, fg=GREEN)
-        status_lbl.pack(pady=6)
+        status_lbl.pack(pady=4)
 
         def _apply():
             if _tts_manager is None:
@@ -671,14 +696,18 @@ class JarvisApp:
                 return
             chosen = engine_var.get()
             api_key = key_var.get().strip()
+            voice_id = voice_var.get().strip()
             if api_key:
                 _tts_manager.set_elevenlabs_key(api_key)
+            if voice_id:
+                _tts_manager.config["elevenlabs"]["voice_id"] = voice_id
             _tts_manager.set_engine(chosen)
+            _tts_manager.save_config()
             self._update_footer()
             status_lbl.config(
                 text=f"Applied! Active: {_tts_manager.engine_label}", fg=GREEN)
-            self._jarvis_msg(f"TTS engine switch ho gaya Sir! Ab use ho raha hai: {_tts_manager.engine_label}")
-            speak("Engine switch ho gaya Sir!")
+            self._jarvis_msg(f"Settings update ho gaye Sir! Active voice ID: {voice_id}")
+            speak("Settings update ho gaye Sir!")
 
         def _test():
             speak("Arre Sir! Yeh test hai. Awaaz kaisi aa rahi hai? Theek hai na?")
