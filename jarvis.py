@@ -618,9 +618,9 @@ class JarvisApp:
         from tkinter import ttk  # Import ttk for Combobox
         win = tk.Toplevel(self.root)
         win.title("TTS Engine Settings")
-        win.geometry("520x620")
+        win.geometry("520x720")
         win.configure(bg=BG)
-        win.resizable(False, False)
+        win.resizable(True, True)
 
         tk.Label(win, text="TTS Engine Settings", font=("Segoe UI", 14, "bold"),
                  bg=BG, fg=ACCENT).pack(pady=(16, 4))
