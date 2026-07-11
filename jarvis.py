@@ -615,9 +615,10 @@ class JarvisApp:
     # ── Settings Panel ────────────────────────────────────────────────────────
     def _open_settings(self):
         """Open TTS settings window."""
+        from tkinter import ttk  # Import ttk for Combobox
         win = tk.Toplevel(self.root)
         win.title("TTS Engine Settings")
-        win.geometry("520x440")
+        win.geometry("520x620")
         win.configure(bg=BG)
         win.resizable(False, False)
 
@@ -636,7 +637,7 @@ class JarvisApp:
         tk.Label(win, text=f"Active: {cur}", font=FONT_B, bg=BG, fg=GREEN).pack()
 
         # Engine selector
-        frm = tk.Frame(win, bg=BG, pady=10)
+        frm = tk.Frame(win, bg=BG, pady=6)
         frm.pack(fill="x", padx=20)
         tk.Label(frm, text="Switch Engine:", font=FONT_B, bg=BG, fg=TEXT).pack(anchor="w")
         engine_var = tk.StringVar(value=_tts_manager.active_name if _tts_manager else "edge_tts")
@@ -646,11 +647,11 @@ class JarvisApp:
                 frm, text=label, variable=engine_var, value=key,
                 font=FONT, bg=BG, fg=TEXT, selectcolor=BG3,
                 activebackground=BG, activeforeground=ACCENT
-            ).pack(anchor="w", padx=10, pady=2)
+            ).pack(anchor="w", padx=10, pady=1)
 
         # ElevenLabs API key
         tk.Label(win, text="ElevenLabs API Key (optional):",
-                 font=FONT_B, bg=BG, fg=TEXT).pack(anchor="w", padx=20, pady=(10,2))
+                 font=FONT_B, bg=BG, fg=TEXT).pack(anchor="w", padx=20, pady=(8,2))
         key_var = tk.StringVar(value=(
             _tts_manager.config["elevenlabs"].get("api_key","") if _tts_manager else ""
         ))
@@ -659,7 +660,7 @@ class JarvisApp:
                              highlightcolor=ACCENT, highlightbackground=BG3)
         key_entry.pack(fill="x", padx=20, ipady=4)
 
-        # ElevenLabs Voice ID
+        # ElevenLabs Voice ID / Dropdown
         tk.Label(win, text="ElevenLabs Voice ID / Preset:",
                  font=FONT_B, bg=BG, fg=TEXT).pack(anchor="w", padx=20, pady=(8,2))
         
@@ -673,7 +674,7 @@ class JarvisApp:
 
         # Presets frame
         pfrm = tk.Frame(win, bg=BG)
-        pfrm.pack(fill="x", padx=20, pady=4)
+        pfrm.pack(fill="x", padx=20, pady=2)
         presets = [
             ("Adam (Warm Male)", "pNInz6obpgDQGcFmaJgB"),
             ("Rachel (Warm Female)", "21m00Tcm4TlvDq8ikWAM"),
@@ -685,6 +686,50 @@ class JarvisApp:
                             relief="flat", bd=0, cursor="hand2", padx=6, pady=2,
                             command=lambda v=vid, n=name: [voice_var.set(v), _tts_manager.config["elevenlabs"].update({"voice_name": n}) if _tts_manager else None])
             btn.pack(side="left", padx=2)
+
+        # Voice fetching section
+        ffrm = tk.Frame(win, bg=BG)
+        ffrm.pack(fill="x", padx=20, pady=4)
+        
+        tk.Label(ffrm, text="Select Account Voice:", font=FONT_S, bg=BG, fg=TEXT_DIM).pack(side="left")
+        
+        voice_dropdown = ttk.Combobox(ffrm, state="readonly", width=30)
+        voice_dropdown.pack(side="left", padx=6)
+        voice_dropdown.set("Click Fetch to load voices")
+        
+        fetched_voices_dict = {}
+
+        def _fetch_voices():
+            if _tts_manager is None:
+                return
+            api_key = key_var.get().strip()
+            if api_key:
+                _tts_manager.set_elevenlabs_key(api_key)
+            voices_list = _tts_manager.fetch_elevenlabs_voices()
+            if voices_list:
+                voice_dropdown.config(state="readonly")
+                voice_names = []
+                for vid, vname in voices_list:
+                    full_label = f"{vname} ({vid[:6]})"
+                    fetched_voices_dict[full_label] = vid
+                    voice_names.append(full_label)
+                voice_dropdown['values'] = voice_names
+                voice_dropdown.set(voice_names[0])
+                voice_var.set(fetched_voices_dict[voice_names[0]])
+                status_lbl.config(text=f"Loaded {len(voices_list)} voices successfully!", fg=GREEN)
+            else:
+                status_lbl.config(text="Could not load voices. Check API key!", fg=RED)
+
+        def _on_dropdown_select(event):
+            selected = voice_dropdown.get()
+            if selected in fetched_voices_dict:
+                voice_var.set(fetched_voices_dict[selected])
+
+        voice_dropdown.bind("<<ComboboxSelected>>", _on_dropdown_select)
+
+        tk.Button(ffrm, text="🔄 Fetch Voices", font=FONT_S, bg=ACCENT2, fg="white",
+                  relief="flat", bd=0, cursor="hand2", padx=8, pady=2,
+                  command=_fetch_voices).pack(side="left", padx=2)
 
         # ElevenLabs Model Selection
         tk.Label(win, text="ElevenLabs Model:",
